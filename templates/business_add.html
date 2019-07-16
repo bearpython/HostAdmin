@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>信息管理系统</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<script type="text/javascript" src="/static/js/jquery/jquery-1.7.1.js"></script>
+<link href="/static/css/basic_layout.css" rel="stylesheet" type="text/css">
+<link href="/static/css/common_style.css" rel="stylesheet" type="text/css">
+{#<script type="text/javascript" src="/static/js/authority/commonAll.js"></script>#}
+<script type="text/javascript" src="/static/js/jquery/jquery-1.4.4.min.js"></script>
+<script src="/static/js/My97DatePicker/WdatePicker.js" type="text/javascript" defer="defer"></script>
+<script type="text/javascript" src="/static/js/artDialog/artDialog.js?skin=default"></script>
+    <style>
+    .input_add {
+        width: 108px;
+        height: 16px;
+        margin: 1px 1px 1px 5px;
+        outline: 0;
+        padding: 5px;
+        border: 1px solid;
+        border-color: #C0C0C0 #D9D9D9 #D9D9D9;
+        border-radius: 2px;
+        background: #FFF;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1), 0 1px 0
+            rgba(255, 255, 255, 0.2);
+        -webkit-transition: box-shadow, border-color .5s ease-in-out;
+        -moz-transition: box-shadow, border-color .5s ease-in-out;
+        -o-transition: box-shadow, border-color .5s ease-in-out;
+    }
+    </style>
+</head>
+<body>
+    <form id="submitForm" name="submitForm">
+        {% csrf_token %}
+        <input style="display: none" type="hidden" name="fyID" value="{{ last_nid.nid }}" id="fyID"/>
+        <div id="container">
+            <div id="nav_links">
+                当前位置：资产管理&nbsp;>&nbsp;<span style="color: #1A5CC6;">业务线添加</span>
+                <div id="page_close">
+                    <a href="javascript:parent.$.fancybox.close();">
+                        <img src="/static/images/common/page_close.png" width="20" height="20" style="vertical-align: text-top;"/>
+                    </a>
+                </div>
+            </div>
+            <div class="ui_content">
+                <table  cellspacing="0" cellpadding="0" width="100%" align="left" border="0">
+                    <tr>
+                        <td class="ui_text_rt">业务线名称</td>
+                        <td class="ui_text_lt">
+                            <input type="text" id="businessname" name="businessname" class="input_add"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="ui_text_rt">业务线编号</td>
+                        <td class="ui_text_lt">
+                            <input type="text" id="businesscode" name="businesscode" class="input_add"/>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <tr>
+            <td>&nbsp;</td>
+            <td class="ui_text_lt">
+                &nbsp;<input id="submitbutton" type="button" value="提交" class="ui_input_btn01"/>
+                &nbsp;<input id="cancelbutton" type="button" value="取消" class="ui_input_btn01"/>
+            </td>
+        </tr>
+        <span id="error_meg" style="color: red"></span>
+    </form>
+
+    <script src="/static/js/jquery-1.12.4.js"></script>
+    <script src="/static/js/jquery.cookie.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function() {
+            /*
+             * 取消
+             */
+            $("#cancelbutton").click(function() {
+                /**  关闭弹出iframe  **/
+                window.parent.$.fancybox.close();
+            });
+
+            var result = 'null';
+            if(result =='success'){
+                /**  关闭弹出iframe  **/
+                window.parent.$.fancybox.close();
+            }
+        });
+
+        function csrfSafeMethod(method) {
+            // these HTTP methods do not require CSRF protection
+            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+        }
+
+        $(function () {
+            $.ajaxSetup({
+                beforeSend:function (xhr,settings) {   //xhr是XMLHttpRequest对象
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader('X-CSRFtoken', $.cookie('csrftoken'));  //这样写上之后就把这个页面的所有ajax请求都加上csrf的请求头了
+                    }
+                }
+            });
+        });
+        //获取编辑页面的数据
+        $('#submitbutton').click(function () {
+            //debugger;
+            var businessname = $("#businessname").val();
+            var businesscode = $("#businesscode").val();
+            $.ajax({
+                url: "/app01/infobusinessadd/",
+                type: 'POST',
+                //data :$('#submitForm').serialize(),
+                //上边的这行代码就是获取id是edit_form这个form表达的所有数据打包发给后台了
+                data: {
+                    "businessname":businessname,
+                    "businesscode":businesscode
+                },
+
+                success: function (data) {
+                    var obj = JSON.parse(data);
+                    if (obj.status) {
+                        window.parent.$.fancybox.close();
+                    } else {
+                        $('#error_meg').text(obj.error);
+                    }
+                }
+            })
+        });
+    </script>
+</body>
+</html>
